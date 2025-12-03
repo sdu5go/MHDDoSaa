@@ -1,0 +1,59 @@
+name: Run WebSocket Script
+
+on:
+  workflow_dispatch:
+    inputs:
+      websocket:
+        description: 'WebSocket server URL'
+        required: true
+      serverid:
+        description: 'Server ID'
+        required: true
+      userid:
+        description: 'Your user ID'
+        required: true
+      sessionid:
+        description: 'Session ID'
+        required: true
+      token:
+        description: 'Token (not auth)'
+        required: true
+      origin:
+        description: 'Origin header for WebSocket connection'
+        required: true
+        default: 'https://mytestsv.com'
+      threads:
+        description: 'Number of threads'
+        required: false
+        default: '100'
+      time:
+        description: 'Number of time'
+        required: false
+        default: '100'
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install websocket-client
+
+    - name: Run script
+      run: |
+        timeout ${{ github.event.inputs.time }} python script.py \
+          -w "${{ github.event.inputs.websocket }}" \
+          -s "${{ github.event.inputs.serverid }}" \
+          -u "${{ github.event.inputs.userid }}" \
+          -e "${{ github.event.inputs.sessionid }}" \
+          -t "${{ github.event.inputs.token }}" \
+          -o "${{ github.event.inputs.origin }}" \
+          -n "${{ github.event.inputs.threads }}"
